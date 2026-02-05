@@ -1,0 +1,187 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{animate}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[sorting = none]{biblatex}
+\usepackage{milstd}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{wrapfig}
+\usepackage{float}
+\newcommand\Bussymbol[1]{%
+  \raisebox{-1.1em}{\scalebox{.7}{\stackunder{\BusWidth}{#1}}}%
+}
+
+\geometry{paperwidth=16cm,paperheight=9cm}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\definecolor{inputNodeColor}{RGB}{255, 217, 102}
+\definecolor{outputNodeColor}{RGB}{94, 165, 244}
+\definecolor{clockNodeColor}{RGB}{255, 137, 137}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,fit,circuits.ee.IEC,positioning, decorations.pathreplacing, calc, arrows.meta}
+\usepackage{verbatim}
+\usepackage[siunitx]{circuitikz}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\newsavebox{\imagebox}
+%\usecolortheme{}
+
+\lstset{language=C++, basicstyle=\tiny,
+                keywordstyle=\color{blue},
+                stringstyle=\color{red},
+                commentstyle=\color{green},
+                morecomment=[l][\color{magenta}]{\#}}
+
+
+%% DIAGRAMA DE BLOQUE %%
+\tikzstyle{block} = [draw, rectangle, 
+    minimum height=3em, minimum width=6em]
+\tikzstyle{large_sum} = [draw, rectangle, 
+    minimum height=2em, minimum width=12em]
+\tikzstyle{reg} = [draw, rectangle, 
+    minimum height=2em, minimum width=0.25em, fill=black]
+\tikzstyle{square_block} = [draw, rectangle, 
+    minimum height=3em, minimum width=3em]
+\tikzstyle{sum} = [draw, circle, node distance=1cm]
+\tikzstyle{node_input} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=inputNodeColor]
+\tikzstyle{node_output} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=outputNodeColor]
+\tikzstyle{node_clock} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=clockNodeColor]
+
+\addbibresource{references.bib}
+
+\newcommand{\mypos}[2]{\tikz[remember picture]{\node[inner sep=0pt, anchor=base](#2){#1};}}
+
+\title{HAWK}
+\subtitle{Simuladores}
+\institute{Fundación Fulgor}
+\author[]{ Venancio, Mauro N.}
+\date{\today}
+
+\begin{document}
+
+\tikzset{slicerpic/.pic = {
+\draw (-1,0) -- (1,0);
+\draw (-0.7,-0.9)--(-0,-0.9) -- (0,0.9) --(0.7,0.9);
+}}
+
+\tikzset{%
+  do path picture/.style={%
+    path picture={%
+      \pgfpointdiff{\pgfpointanchor{path picture bounding box}{south west}}%
+        {\pgfpointanchor{path picture bounding box}{north east}}%
+      \pgfgetlastxy\x\y%
+      \tikzset{x=\x/2,y=\y/2}%
+      #1
+    }
+  },
+  sin wave/.style={do path picture={    
+    \draw [line cap=round,  minimum height=3em] (-3/4,0)
+      sin (-3/8,1/2) cos (0,0) sin (3/8,-1/2) cos (3/4,0);
+  }},
+  cross/.style={do path picture={    
+    \draw [line cap=round] (-1,-1) -- (1,1) (-1,1) -- (1,-1);
+  }},
+  plus/.style={do path picture={    
+    \draw [line cap=round] (-3/4,0) -- (3/4,0) (0,-3/4) -- (0,3/4);
+  }}
+}
+
+
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=1.4pt, shorten >= 5.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt}]
+\tikzstyle{innerWhite} = [semithick, white,line width=1.4pt, shorten >= 4.5pt]
+
+
+
+
+
+
+\tikzset{clipper_pic/.pic = {
+\draw (-1,-0.9)--(-0.5,-0.9) -- (0.5,0.9) --(1,0.9);
+}}
+
+\begin{frame}{Low Pass Filter Sim}
+    \begin{figure}
+        \centering
+        \begin{tikzpicture}[thick,scale=0.6, every node/.style={scale=0.6}]
+            %\node[node_input, label={180:i\_signal}] (i_slicer_i){};
+
+	\node[circle, draw, sin wave, node distance = 2 cm, minimum height=3em, label=u\_sin\_low] (sin_gen_i){};
+
+	%\node [square_block, node distance=2cm, label=Sine generator] (sin_gen_i) {u\_sin\_low};
+
+	\node[circle, draw, sin wave, below of=sin_gen_i, node distance = 3 cm, minimum height=3em, label=u\_sin\_high] (sin_gen_2_i){};
+
+          %\node [square_block, right of=sin_gen_i, node distance=3cm, label=u\_shift\_reg] (shift_reg_i) {Shift Register};
+
+          \node[node_clock, node distance = 1.5 cm, label={180:i\_clock}] at (-2,-5) (clock){};
+
+          
+
+          %\draw[arrows=->,>=latex] (sin_gen_i) -- (shift_reg_i);
+
+          %\draw[arrows=->,>=latex] (shift_reg_i) -- (o_shift_reg);
+
+          %\draw[dotted,arrows=->,>=latex] (clock) |- (shift_reg_i);
+
+	
+
+	%\draw[dotted,arrows=->,>=latex] (clock) |- (sin_gen_i);
+	\draw[dotted,arrows=->,>=latex] (clock) -- ++(0.6,0) -- ++ (0,3.5) -| (sin_gen_i);
+
+	%\draw[dotted,arrows=->,>=latex] (clock) |- (sin_gen_2_i);
+
+
+	%\node[pos=0.1,name=node_aux_2] {};
+          %\draw[dotted,arrows=->,>=latex] (node_aux_2)  |- node[pos=0.3, name=node_aux_3]{} (sin_gen_2_i);
+
+	%\node[pos=0.1,name=node_aux_2]{} (sin_gen_i.west);
+          %\draw[dotted,arrows=->,>=latex] (node_aux_2.center) -- ++(0,-3) -| node[pos=0.3, name=node_aux_3]{} (sin_gen_2_i);
+
+	%\draw[arrows=->,>=latex] (clock) -- ++(1,0) |- ++(-5,1) |- node[pos=0,name=node_aux_1]{}(sin_gen_2_i);
+	%\draw[dotted,arrows=->,>=latex] (clock) -- ++(0.6,0) -- ++ (0,-4.5) -| (sin_gen_2_i);
+	\draw[dotted,arrows=->,>=latex] (clock) -| (sin_gen_2_i);
+
+	\node[sum, right of = sin_gen_i , node distance = 2cm, label={180:u\_adder}]  at (1,-1.5)  (sum_1){\scriptsize{+}};
+
+	\draw[arrows=->,>=latex] (sin_gen_i)  -| (sum_1);
+
+	\draw[arrows=->,>=latex] (sin_gen_2_i)  -| (sum_1);
+
+	\node[square_block, right of = sum_1 , node distance = 2cm, label=u\_filter]  (fir_filter){FIR Filter};
+
+	\draw[arrows=->,>=latex] (sum_1)  -- (fir_filter);
+
+	%\draw[dotted,arrows=->,>=latex] (clock) -- ++(0.6,0) -- ++ (0,-4.5) -| (fir_filter);
+	\draw[dotted,arrows=->,>=latex] (clock) -| (fir_filter);
+
+	\node[node_output, right of = fir_filter, node distance = 2 cm, label={0:o\_signal}] (o_signal){};
+	\draw[arrows=->,>=latex] (fir_filter) -- (o_signal);
+
+
+            % Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](clock) -- ++(0,-1) -| (o_signal) -- ++(0,4.5) -| (clock);
+        \end{tikzpicture}
+        \caption{Low Pass Filter Simulator Modules}
+        \label{fig:enter-label}
+    \end{figure}
+
+
+\end{frame}
+
+
+\end{document}

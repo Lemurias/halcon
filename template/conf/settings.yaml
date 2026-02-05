@@ -1,0 +1,19 @@
+root:
+   u_sin_low:
+      amplitude_v: 1
+      frequency_hz: 5
+      phase_deg: 0
+   u_sin_high:
+      amplitude_v: 1
+      frequency_hz: 20
+      phase_deg: 0
+   u_filter:
+      coeffs: [1, 1, 1, 1, 1]
+   clk:
+      frequency_hz: 100
+      initial_phase: 0
+   clk_cmd_handler:
+      frequency_hz: 100
+      initial_phase: 0
+   logger_max_buffer_size: 1000
+   n_iterations: 1000
