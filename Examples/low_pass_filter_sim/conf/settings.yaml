@@ -1,0 +1,20 @@
+root:
+  enable_log: 1
+  fs_clk: 10000000.0
+  logger_buffer_size: 1000
+  n_iterations: 10000
+  u_filter:
+    coeffs:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  u_sin_high:
+    amplitude_v: 1
+    frequency_hz: 1500000.0
+    phase_deg: 0
+  u_sin_low:
+    amplitude_v: 1
+    frequency_hz: 1000000.0
+    phase_deg: 0
