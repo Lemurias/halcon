@@ -1,0 +1,1 @@
+sudo docker run -v ./:/app -it hawk_workspace_p
