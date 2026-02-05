@@ -1,0 +1,17 @@
+root:
+  br: 100000
+  enable_log: 0
+  logger_buffer_size: 1000
+  m_qam: 16
+  n_iterations: 100000
+  p_tx: 1
+  u_ber_counter:
+    corr_signals_size: 100
+    enable: 0
+  u_channel:
+    u_awgn_ch:
+      ebno_db: 18
+      seed: 0
+  u_transmitter:
+    u_symbol_gen:
+      seed: 0
