@@ -1,2 +1,0 @@
-/usr/bin/ar qc liblocal.a  CMakeFiles/local.dir/src/adder/adder.cpp.o CMakeFiles/local.dir/src/filter/filter.cpp.o CMakeFiles/local.dir/src/root/root.cpp.o CMakeFiles/local.dir/src/sin_generator/sin_generator.cpp.o
-/usr/bin/ranlib liblocal.a
