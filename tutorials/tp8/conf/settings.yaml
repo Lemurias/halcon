@@ -1,0 +1,14 @@
+root:
+  clk:
+    frequency_hz: 100000.0
+    initial_phase: 0
+  clk_cmd_handler:
+    frequency_hz: 1
+    initial_phase: 0
+  enable_log: 1
+  logger_max_buffer_size: 1000
+  n_iterations: 100000
+  u_filter_iir:
+    alpha: 0.01
+  u_symbol_gen:
+    seed: 0
