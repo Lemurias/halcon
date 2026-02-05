@@ -1,0 +1,6 @@
+[submodule "tools"]
+	path = tools
+	url = https://github.com/Lemurias/halcon/tools
+[submodule "release"]
+	path = release
+	url = https://github.com/Lemurias/halcon/release

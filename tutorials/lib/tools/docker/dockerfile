@@ -1,0 +1,113 @@
+################################################################################
+# ██████████████████████████████████████████████████████████████████████████████
+# █▀▀▀▀███▀▀▀▀█████▀▀▀▀▀██████▀▀▀█████████▀▀▀▀▀▀▀███████▀▀▀▀▀▀▀█████▀▀▀▀████▀▀▀█
+# █    ███    ████▌      ████▌   ████████    ▄▄    ███▀   ▄▄▄   ▀███     ▀██   █
+# █    ▀▀▀    ████   ▄   ▐███▌   ███████    ████▄▄▄██▌   ▐███▌   ▐██       ▀   █
+# █           ███   ▐█▌   ███▌   ███████    █████████▌   ▐███▌    ██   ▄       █
+# █    ███    ██▌          ██▌   ███████▄   ▀██▀   ▐██    ███    ███   ██▄     █
+# █    ███    ██   █████   ██▌        ████▄      ▄█████▄       ▄████   ████▄   █
+# ██████████████████████████████████████████████████████████████████████████████
+# █████████████████████████ DSP SIMULATION ENGINE ██████████████████████████████
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+################################################################################
+# Author: Patricio Reus Merlo
+# Date: 05/16/2024
+################################################################################
+# MIT License
+# 
+# Copyright (c) 2024 Fundacion Fulgor
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+################################################################################
+
+FROM mcr.microsoft.com/devcontainers/cpp:ubuntu-20.04 AS host
+
+LABEL maintainer="Patricio Reus Merlo"
+LABEL version="1.0"
+LABEL description="HALCON workspace"
+
+# Actualizar repositorios e instalar herramientas básicas
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    curl \
+    snap \
+    git \
+    gdb \
+    cgdb \
+    && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
+    && apt-get update \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar GCC 13 y G++ 13
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc-13 \
+    g++-13 \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 13 --slave /usr/bin/g++ g++ /usr/bin/g++-13 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar librerías C++
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libjsoncpp-dev=1.7.4-3.1ubuntu2 \
+    libyaml-cpp-dev=0.6.2-4ubuntu1 \
+    libspdlog-dev=1:1.5.0-1 \
+    libboost-all-dev=1.71.0.0ubuntu2 \
+    libfftw3-dev=3.3.8-2ubuntu1 \
+    libgtest-dev=1.10.0-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Doxygen y Graphviz
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    doxygen=1.8.17-0ubuntu2 \
+    graphviz=2.42.2-3build2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar zsh
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    zsh \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf ~/.oh-my-zsh \
+    && rm ~/.zshrc \
+    && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Instalar Python y librerías
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m pip install --no-cache-dir \
+    pyyaml \
+    matplotlib \
+    numpy \
+    scipy \
+    colorama \
+    psutil \
+    tabulate \
+    pylatex \
+    && echo "alias python='python3'" >> /etc/bash.bashrc
+
+ENV PYTHONPATH='/app/lib/tools/python:/app/tools/python'
+
+WORKDIR /app
+VOLUME ["/app"]
+CMD ["zsh"]

@@ -1,0 +1,9 @@
+[submodule "lib/modules"]
+	path = lib/modules
+	url = https://github.com/Lemurias/halcon/modules.git
+[submodule "lib/core"]
+	path = lib/core
+	url = https://github.com/Lemurias/halcon/release.git
+[submodule "lib/tools"]
+	path = lib/tools
+	url = https://github.com/Lemurias/halcon/tools

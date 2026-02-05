@@ -1,0 +1,46 @@
+# File types
+*.py~
+*.asv
+*.m~
+*.dvi
+*.ps
+*.aux
+*.log
+*.xml
+*.synctex.gz
+*blx.bib
+*.bbl
+*.blg
+*.mat
+*.txt
+*.rar
+*.fls
+*.toc
+*.lof
+*.gz
+*.out
+*.lot
+*.fdb_latexmk
+*.png
+*.jpg
+*.fig
+*.bin
+*.json
+*.exe
+*.json
+*.pyc
+*.o
+*output
+ 
+# Hidden files and directories
+.vscode
+.editorconfig
+.out
+.history/*
+
+# Directories
+*__pycache__
+
+# Don't ignore
+!README.md
+!CMakeLists.txt
