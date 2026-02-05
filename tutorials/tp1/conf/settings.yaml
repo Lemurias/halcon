@@ -1,0 +1,8 @@
+root:
+  fs_hz: 100
+  logger_buffer_size: 1000
+  n_samples: 1000
+  u_sin_gen:
+    amplitude_v: 1
+    frequency_hz: 1
+    phase_deg: 0

@@ -1,0 +1,9 @@
+root:
+  enable_log: 1
+  fs_hz: 100
+  logger_buffer_size: 100000
+  n_iterations: 100000
+  u_sin_gen:
+    amplitude_v: 1
+    frequency_hz: 1
+    phase_deg: 0

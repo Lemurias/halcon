@@ -1,0 +1,20 @@
+root:
+  clk:
+    frequency_hz: 1000000.0
+    initial_phase: 0
+  clk_cmd_handler:
+    frequency_hz: 1000000.0
+    initial_phase: 0
+  logger_max_buffer_size: 10000
+  n_iterations: 40000
+  u_filter:
+    coeffs:
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
+  u_sin_gen:
+    amplitude_v: 1
+    frequency_hz: 50000.0
+    phase_deg: 0

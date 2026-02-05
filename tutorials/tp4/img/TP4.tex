@@ -1,0 +1,268 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{animate}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[sorting = none]{biblatex}
+\usepackage{milstd}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{wrapfig}
+\usepackage{float}
+\newcommand\Bussymbol[1]{%
+  \raisebox{-1.1em}{\scalebox{.7}{\stackunder{\BusWidth}{#1}}}%
+}
+
+\geometry{paperwidth=16cm,paperheight=9cm}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\definecolor{inputNodeColor}{RGB}{255, 217, 102}
+\definecolor{outputNodeColor}{RGB}{94, 165, 244}
+\definecolor{clockNodeColor}{RGB}{255, 137, 137}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,fit,circuits.ee.IEC,positioning, decorations.pathreplacing, calc, arrows.meta}
+\usepackage{verbatim}
+\usepackage[siunitx]{circuitikz}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\newsavebox{\imagebox}
+%\usecolortheme{}
+
+\lstset{language=C++, basicstyle=\tiny,
+                keywordstyle=\color{blue},
+                stringstyle=\color{red},
+                commentstyle=\color{green},
+                morecomment=[l][\color{magenta}]{\#}}
+
+
+%% DIAGRAMA DE BLOQUE %%
+\tikzstyle{block} = [draw, rectangle, 
+    minimum height=3em, minimum width=6em]
+\tikzstyle{large_sum} = [draw, rectangle, 
+    minimum height=2em, minimum width=12em]
+\tikzstyle{reg} = [draw, rectangle, 
+    minimum height=2em, minimum width=0.25em, fill=black]
+\tikzstyle{square_block} = [draw, rectangle, 
+    minimum height=3em, minimum width=3em]
+\tikzstyle{sum} = [draw, circle, node distance=1cm]
+\tikzstyle{node_input} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=inputNodeColor]
+\tikzstyle{node_output} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=outputNodeColor]
+\tikzstyle{node_clock} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=clockNodeColor]
+
+\addbibresource{references.bib}
+
+\newcommand{\mypos}[2]{\tikz[remember picture]{\node[inner sep=0pt, anchor=base](#2){#1};}}
+
+\title{HAWK}
+\subtitle{Simuladores}
+\institute{Fundación Fulgor}
+\author[]{ Venancio, Mauro N.}
+\date{\today}
+
+\begin{document}
+
+\tikzset{slicerpic/.pic = {
+\draw (-1,0) -- (1,0);
+\draw (-0.7,-0.9)--(-0,-0.9) -- (0,0.9) --(0.7,0.9);
+}}
+
+\tikzset{%
+  do path picture/.style={%
+    path picture={%
+      \pgfpointdiff{\pgfpointanchor{path picture bounding box}{south west}}%
+        {\pgfpointanchor{path picture bounding box}{north east}}%
+      \pgfgetlastxy\x\y%
+      \tikzset{x=\x/2,y=\y/2}%
+      #1
+    }
+  },
+  sin wave/.style={do path picture={    
+    \draw [line cap=round,  minimum height=3em] (-3/4,0)
+      sin (-3/8,1/2) cos (0,0) sin (3/8,-1/2) cos (3/4,0);
+  }},
+  cross/.style={do path picture={    
+    \draw [line cap=round] (-1,-1) -- (1,1) (-1,1) -- (1,-1);
+  }},
+  plus/.style={do path picture={    
+    \draw [line cap=round] (-3/4,0) -- (3/4,0) (0,-3/4) -- (0,3/4);
+  }}
+}
+
+
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=1.4pt, shorten >= 5.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt}]
+\tikzstyle{innerWhite} = [semithick, white,line width=1.4pt, shorten >= 4.5pt]
+
+
+
+\tikzset{clipper_pic/.pic = {
+\draw (-1,-0.9)--(-0.5,-0.9) -- (0.5,0.9) --(1,0.9);
+}}
+
+
+\begin{frame}{Modules}
+    \begin{figure}
+        \centering
+        \begin{tikzpicture}[thick,scale=0.6, every node/.style={scale=0.6}]
+            %\node[node_input, label={180:i\_signal}] (i_slicer_i){};
+
+	\node[circle, draw, sin wave, node distance = 2 cm, minimum height=3em, label=u\_sin\_gen] (sin_gen_i){};
+
+
+	\node[node_clock, node distance = 1.5 cm, label={180:i\_clock}] at (-2,-1.5) (clock){};
+
+	\draw[dotted,arrows=->,>=latex] (clock) -| (sin_gen_i);
+
+
+	\node[square_block, right of =  sin_gen_i , node distance = 3cm, label=u\_filter]  (fir_filter){FIR Filter};
+
+	\draw[arrows=->,>=latex] (sin_gen_i)  -- (fir_filter);
+
+	\draw[dotted,arrows=->,>=latex] (clock) -| (fir_filter);
+
+	\node[node_output, right of = fir_filter, node distance = 2 cm, label={0:o\_signal}] (o_signal){};
+	\draw[arrows=->,>=latex] (fir_filter) -- (o_signal);
+
+
+            % Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](clock) -- ++(0,-1) -| (o_signal) -- ++(0,1.5) -| (clock);
+        \end{tikzpicture}
+        \caption{TP4 connection}
+        \label{fig:enter-label}
+    \end{figure}
+
+
+\end{frame}
+
+
+
+
+\begin{frame}{Filter N TAPS}
+    \begin{figure}[h!]
+        \centering
+        \begin{tikzpicture}[thick,scale=0.8, every node/.style={scale=0.8}]
+            
+                \node[reg] at (1,0) (reg_1){};
+                \draw[arrows=->,>=latex] (reg_1) -| node[pos=0.99,label={0:\tiny h(1)},name=prod_1]{} ++ (0.5,-1.8);
+                \node[sum, below of = prod_1, node distance = 1.5cm] (sum_1){\tiny +};
+                \draw[arrows=->,>=latex] (prod_1.center) -- (sum_1);
+                
+                \node at (2,0) (reg_2){};
+                %\draw[arrows=->,>=latex] (reg_2) -| node[pos=0.99,label={0:\tiny h(2)},name=prod_2]{} ++ (0.5,-1.8);
+                %\draw[arrows=->,>=latex] (reg_2) -| node[pos=0.99,label={0:\tiny h(2)},name=prod_2]{} ++ (0.5,-1.8);
+                \node[right of=sum_1, xshift=-0.3cm] (sum_2){} ;
+                %\draw[arrows=->,>=latex] (prod_2.center) -- (sum_2);
+                
+                \node at (3,0) (reg_3){};
+                \draw[arrows=->,>=latex] (reg_3) -| node[pos=0.99,label={0:\tiny h(N-2)},name=prod_3]{} ++ (0.5,-1.8);
+                \node[sum, below of = prod_3, node distance = 1.5cm] (sum_3){\tiny +};
+                \draw[arrows=->,>=latex] (prod_3.center) -- (sum_3);
+                
+                \node[reg] at (4,0) (reg_4){};
+                \draw[arrows=->,>=latex] (reg_4) -| node[pos=0.99,label={0:\tiny h(N-1)},name=prod_4]{} ++ (0.5,-1.8);
+                \node[sum, below of = prod_4, node distance = 1.5cm] (sum_4){\tiny +};
+                \draw[arrows=->,>=latex] (prod_4.center) -- (sum_4);
+            
+            
+            
+            \draw[arrows=->,>=latex] (reg_1) -- (reg_2);
+ %           \draw[arrows=->,>=latex] (sum_1) -- (sum_2);
+
+			\draw[dotted,>=latex] (reg_2) ++ (0.35,0) --  ++ (0.3,0);
+            %\draw[arrows=->,>=latex] (sum_2) -- (sum_3);            
+            
+            \draw[arrows=->,>=latex] (reg_3) -- (reg_4);
+	 		\draw[arrows=->,>=latex] (sum_3) -- (sum_4);
+                
+              
+            
+            
+            
+             
+            
+            
+            
+    
+            \draw[arrows=<-,>=latex] (reg_1) -- node[node_input,pos=0.99,name=input,label={180:i\_signal}]{} ++(-1.5,0);
+    
+            \draw[arrows=->,>=latex] (input) -| node[pos=0.99,label={0:\tiny h(0)},name=prod_0]{} ++ (1,-1.8);
+            
+            
+		    \node[label={}, right of = prod_0 ,name=prod_2]{} ++ (0.5,0);
+            
+            %\draw[dotted,>=latex] (prod_2) -- (prod_3);            
+            
+    
+            \draw[arrows=->,>=latex] (prod_0.center) |- (sum_1);
+
+            \node[reg, right of = sum_4, node distance = 1cm, label={90:\scriptsize{r\_out}}](output_reg){};
+
+            \draw[arrows=->,>=latex] (sum_4) -- (output_reg);
+    
+            \draw[arrows=-,>=latex] (output_reg) -- 
+            node[pos=0.5,name=sat_trunc]{} node[node_output, pos=0.99,name=output,label={0:o\_signal}]{} ++(1.5,0);
+
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](0.2,-0.75) -. (4.8,-0.75) -. node[label={0:\scriptsize{r\_	shift\_reg}}]{}  (4.8,0.6) -. (0.2,0.6) -. (0.2,-0.75);
+
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](0.2,-2.1) -. (5.5,-2.1) -. node[label={0:\scriptsize{coeffs}}]{} (5.5,-1.3) -. (0.2,-1.3) -. (0.2,-2.1);
+
+            % Clock
+            \node[node_clock, below of = input, node distance = 4 cm, label={180:i\_clock}] (clock){};
+
+            
+            
+		      
+		    
+		    \draw[dotted, arrows=->,>=latex] (clock) -- ++ (2.5,0);      
+		    
+		    \draw[dotted,>=latex] (clock) ++ (2.85,0) -- ++ (0.3,0); 
+		    
+			\path[] (clock) -| node[pos=0.03,name=aux_clk_1]{} (output_reg);		    
+		    
+		    \draw[dotted, arrows=->,>=latex] (clock) ++ (3.5,0) -| (output_reg);
+            
+            
+            
+            \draw[dotted,>=latex] (sum_2) -- ++ (0.5,0); 
+            
+            \draw[arrows=->,>=latex] (sum_1) -- ++ (0.75,0);
+            
+            \draw[arrows=->,>=latex] (sum_2) ++ (0.55,0) -- (sum_3);
+            
+            %\draw[dotted,>=latex] (sum_2) ++ (0.5,0) -- (sum_3); 
+               
+			\draw[dotted, >=latex] (prod_0.center) ++ (1.85,0) --  ++ (0.3,0);               
+               
+                       
+            \draw[dotted, arrows=->,>=latex] (aux_clk_1.center) -- ++(0,3) -| (reg_1);
+%            \draw[dotted, arrows=->,>=latex] (aux_clk_1.center) -- ++(0,3) -| (reg_2);
+ %           \draw[dotted, arrows=->,>=latex] (aux_clk_1.center) -- ++(0,3) -| (reg_3);
+            \draw[dotted, arrows=->,>=latex] (aux_clk_1.center) -- ++(0,3) --  ++ (1.85,0); 
+            \draw[dotted, >=latex] (aux_clk_1.center) ++ (2.35,3) --  ++ (0.3,0);
+            \draw[dotted, arrows=->,>=latex] (aux_clk_1.center) ++ (3.1,3) -| (reg_4);
+            
+
+            % Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](input) -- (clock) -- ++(0,-0.5) -|  (output) -- ++(0,4) -| (input);
+            
+        \end{tikzpicture}
+        \caption{Raised Cosine Filter Module with N taps}
+        \label{fig:lab_02}
+    \end{figure}
+\end{frame}
+
+
+
+\end{document}

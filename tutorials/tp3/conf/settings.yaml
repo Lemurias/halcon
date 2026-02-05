@@ -1,0 +1,15 @@
+root:
+  fs_hz: 100
+  logger_buffer_size: 1000
+  n_iterations: 10000
+  u_filter:
+    coeffs:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  u_sin_gen:
+    amplitude_v: 1
+    frequency_hz: 10
+    phase_deg: 0
