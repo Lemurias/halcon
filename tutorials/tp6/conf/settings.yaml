@@ -1,0 +1,24 @@
+root:
+  baud_frequency_hz: 250000.0
+  beta: 0.5
+  clk:
+    frequency_hz: 250000
+    initial_phase: 0
+  clk_cmd_handler:
+    frequency_hz: 1000000
+    initial_phase: 0
+  clk_oversampling:
+    frequency_hz: 1000000
+    initial_phase: 0
+  logger_max_buffer_size: 10000
+  m_qam: 4
+  n_iterations: 10000
+  normalize: 1
+  oversampling: 4
+  p_tx: 1
+  u_rrc_filter:
+    coeffs: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  u_symbol_gen:
+    seed: 0
+  u_upsampling:
+    phase: 0

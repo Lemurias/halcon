@@ -1,0 +1,194 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{animate}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[sorting = none]{biblatex}
+\usepackage{milstd}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{setspace}
+\newcommand\Bussymbol[1]{%
+  \raisebox{-1.1em}{\scalebox{.7}{\stackunder{\BusWidth}{#1}}}%
+}
+
+\geometry{paperwidth=16cm,paperheight=9cm}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\definecolor{inputNodeColor}{RGB}{255, 217, 102}
+\definecolor{outputNodeColor}{RGB}{94, 165, 244}
+\definecolor{clockNodeColor}{RGB}{255, 137, 137}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,fit,circuits.ee.IEC,positioning, decorations.pathreplacing, calc, arrows.meta}
+\usepackage{verbatim}
+\usepackage[siunitx]{circuitikz}
+\usetikzlibrary{intersections}
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+\usepackage{tkz-euclide}
+
+\newsavebox{\imagebox}
+%\usecolortheme{}
+
+\lstset{language=C++, basicstyle=\tiny,
+                keywordstyle=\color{blue},
+                stringstyle=\color{red},
+                commentstyle=\color{green},
+                morecomment=[l][\color{magenta}]{\#}}
+
+
+%% DIAGRAMA DE BLOQUE %%
+\tikzstyle{block} = [draw, rectangle, 
+    minimum height=3em, minimum width=6em]
+\tikzstyle{large_sum} = [draw, rectangle, 
+    minimum height=2em, minimum width=12em]
+\tikzstyle{medium_sum_2} = [draw, rectangle, 
+    minimum height=8em, minimum width=2em]
+\tikzstyle{reg} = [draw, rectangle, 
+    minimum height=2em, minimum width=0.25em, fill=black]
+\tikzstyle{square_block} = [draw, rectangle, 
+    minimum height=1em, minimum width=1em]
+\tikzstyle{square_block_medium} = [draw, rectangle, 
+    minimum height=3em, minimum width=3em]
+\tikzstyle{sum} = [draw, circle, node distance=1cm]
+\tikzstyle{node_input} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=inputNodeColor]
+\tikzstyle{node_output} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=outputNodeColor]
+\tikzstyle{node_clock} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=clockNodeColor]
+
+\addbibresource{references.bib}
+
+\newcommand{\mypos}[2]{\tikz[remember picture]{\node[inner sep=0pt, anchor=base](#2){#1};}}
+
+\title{HAWK}
+\subtitle{Simuladores}
+\institute{Fundación Fulgor}
+\author[]{ Venancio, Mauro N.}
+\date{\today}
+
+\begin{document}
+\def\radius{1.2 mm} 
+
+
+
+\tikzset{slicerpic/.pic = {
+\draw (-1,0) -- (1,0);
+\draw (-0.7,-0.9)--(-0,-0.9) -- (0,0.9) --(0.7,0.9);
+}}
+
+
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=1.4pt, shorten >= 5.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt}]
+\tikzstyle{innerWhite} = [semithick, white,line width=1.4pt, shorten >= 4.5pt]
+
+
+
+\tikzset{clipper_pic/.pic = {
+\draw (-1,-0.9)--(-0.5,-0.9) -- (0.5,0.9) --(1,0.9);
+}}
+
+\begin{frame}{TP7 2}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[thick,scale=0.6, every node/.style={scale=0.6}]
+			\node[block, label={u\_symbol\_gen}](symbolgenerator){\begin{tabular}{c}
+			Symbol \\
+			Generator
+			\end{tabular}};
+			\node[square_block_medium, right of = symbolgenerator, node distance = 3 cm, label={u\_upsampling}] (upsampler){$\uparrow$};
+			%\node[block, right of = upsampler, node distance = 3 cm, label={u\_rc\_filter}] (u_rc_filter){\begin{tabular}{c}
+			%Raised \\
+			% Cosine \\
+			%Filter
+			%\end{tabular}};		
+			\node[block, below right of = upsampler, node distance = 4.5 cm, label={u\_ser\_to\_par}] (u_ser_to_par){\begin{tabular}{c}
+			Serial \\
+			 to \\
+			Parallel
+			\end{tabular}};
+			\node[block, right of = u_ser_to_par, node distance = 3.5 cm, label={u\_parallel\_filter}] (u_parallel_filter){\begin{tabular}{c}
+			Parallel \\
+			 FIR \\
+			 Filter
+			\end{tabular}};
+			\node[block, right of = u_parallel_filter, node distance = 3.5 cm, label={u\_par\_to\_ser}] (u_par_to_ser){\begin{tabular}{c}
+			Parallel \\
+			 to \\
+			Serial
+			\end{tabular}};			
+			\node[node_output, right of = u_par_to_ser, node distance = 3 cm](o_signal_p) {} ;
+			
+					
+			\node[block, right of = upsampler, node distance = 6.7 cm, label={u\_filter}] (u_filter){\begin{tabular}{c}
+			Serial \\
+			 FIR \\
+			Filter
+			\end{tabular}};				
+			\node[node_output, right of = u_filter, node distance = 6.5 cm] (o_signal_s) {} ;
+			
+			\draw[arrows=->, >=latex] (symbolgenerator) -- (upsampler);
+			%\draw[arrows=->, >=latex] (upsampler) -- (u_rc_filter);
+			\draw[arrows=->, >=latex] (upsampler) -- (u_filter);
+			
+			\draw[arrows=-, >=latex] (upsampler) -- ++ (1.5,0);
+			\draw[arrows=->, >=latex] ($(upsampler) + (1.5,0)$) |- (u_ser_to_par);
+
+			
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, 0.6)$) -- ($(u_parallel_filter.west) + (0, 0.6)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, 0.2)$) -- ($(u_parallel_filter.west) + (0, 0.2)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, -0.2)$) -- ($(u_parallel_filter.west) + (0, -0.2)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, -0.6)$) -- ($(u_parallel_filter.west) + (0, -0.6)$);
+			
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, 0.6)$) -- ($(u_par_to_ser.west) + (0, 0.6)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, 0.2)$) -- ($(u_par_to_ser.west) + (0, 0.2)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, -0.2)$) -- ($(u_par_to_ser.west) + (0, -0.2)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, -0.6)$) -- ($(u_par_to_ser.west) + (0, -0.6)$);
+
+
+
+			\node[node_clock, label = {180:clk\_slow}] at ($ (symbolgenerator) - (2, 5) $) (i_clock){};
+			\node[node_clock, below of = i_clock, node distance = 1 cm, label={180:clk\_fast}] (i_clock_os){};
+			\node[node_clock, above of = i_clock, node distance = 1 cm, label={180:clk}] (i_clock_baud){};
+			
+			\draw[dotted, arrows=->, >=latex] (i_clock_baud) -| (symbolgenerator);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| (upsampler);
+			\node [right of = i_clock, node distance = 5cm] (aux_clk_slow) {}; 
+			
+			\draw[dotted, arrows=-, >=latex] (i_clock) -- ($(aux_clk_slow.center) + (-0.25,0)$);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow.center) + (+0.25,0)$) -| ($(u_ser_to_par.south) + (-0.5,0)$);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| ($(u_ser_to_par.south) + (0.5,0)$);
+			
+			\node [right of = i_clock, node distance = 8.7cm] (aux_clk_slow_2) {}; 
+			\draw[dotted, arrows=-, >=latex] ($(aux_clk_slow.center) + (+0.25,0)$) -- ($(aux_clk_slow_2.center) + (-0.25,0)$);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow_2.center) + (+0.25,0)$) -| (u_parallel_filter.south);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow_2.center) + (+0.25,0)$) -| ($(u_par_to_ser.south) + (-0.5,0)$);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| ($(u_par_to_ser.south) + (0.5,0)$);
+			\draw[arrows=->, >=latex] (u_par_to_ser) -- (o_signal_p);
+			
+			\draw[arrows=->, >=latex] (u_filter) -- (o_signal_s);
+			
+			\draw[dotted, arrows=->, >=latex] ($(i_clock_os) + (5,4.5)$) -| (u_filter);
+			
+			% Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](i_clock_os) -- ++(0,-0.75) -| (o_signal_p) -- (o_signal_s) -- ++(0,1.75) -| (i_clock_baud) -- (i_clock) -- (i_clock_os);
+		\end{tikzpicture}
+		\caption{TP7 2 Connection}
+		\label{fig:transmisor}
+	\end{figure}
+
+\end{frame}
+
+
+
+\end{document}

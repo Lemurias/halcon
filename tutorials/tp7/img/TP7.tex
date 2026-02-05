@@ -1,0 +1,409 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{animate}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[sorting = none]{biblatex}
+\usepackage{milstd}
+\usepackage{stackengine}
+\usepackage{scalerel}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{setspace}
+\newcommand\Bussymbol[1]{%
+  \raisebox{-1.1em}{\scalebox{.7}{\stackunder{\BusWidth}{#1}}}%
+}
+
+\geometry{paperwidth=16cm,paperheight=9cm}
+
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+
+\definecolor{inputNodeColor}{RGB}{255, 217, 102}
+\definecolor{outputNodeColor}{RGB}{94, 165, 244}
+\definecolor{clockNodeColor}{RGB}{255, 137, 137}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,fit,circuits.ee.IEC,positioning, decorations.pathreplacing, calc, arrows.meta}
+\usepackage{verbatim}
+\usepackage[siunitx]{circuitikz}
+\usetikzlibrary{intersections}
+\epstopdfDeclareGraphicsRule{.gif}{png}{.png}{convert gif:#1 png:\OutputFile}
+\AppendGraphicsExtensions{.gif}
+\usepackage{tkz-euclide}
+
+\newsavebox{\imagebox}
+%\usecolortheme{}
+
+\lstset{language=C++, basicstyle=\tiny,
+                keywordstyle=\color{blue},
+                stringstyle=\color{red},
+                commentstyle=\color{green},
+                morecomment=[l][\color{magenta}]{\#}}
+
+
+%% DIAGRAMA DE BLOQUE %%
+\tikzstyle{block} = [draw, rectangle, 
+    minimum height=3em, minimum width=6em]
+\tikzstyle{large_sum} = [draw, rectangle, 
+    minimum height=2em, minimum width=12em]
+\tikzstyle{medium_sum_2} = [draw, rectangle, 
+    minimum height=8em, minimum width=2em]
+\tikzstyle{reg} = [draw, rectangle, 
+    minimum height=2em, minimum width=0.25em, fill=black]
+\tikzstyle{square_block} = [draw, rectangle, 
+    minimum height=1em, minimum width=1em]
+\tikzstyle{square_block_medium} = [draw, rectangle, 
+    minimum height=3em, minimum width=3em]
+\tikzstyle{sum} = [draw, circle, node distance=1cm]
+\tikzstyle{node_input} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=inputNodeColor]
+\tikzstyle{node_output} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=outputNodeColor]
+\tikzstyle{node_clock} = [draw, rectangle, minimum height=0.25em, minimum width=0.25em, fill=clockNodeColor]
+
+\addbibresource{references.bib}
+
+\newcommand{\mypos}[2]{\tikz[remember picture]{\node[inner sep=0pt, anchor=base](#2){#1};}}
+
+\title{HAWK}
+\subtitle{Simuladores}
+\institute{Fundación Fulgor}
+\author[]{ Venancio, Mauro N.}
+\date{\today}
+
+\begin{document}
+\def\radius{1.2 mm} 
+
+
+
+\tikzset{slicerpic/.pic = {
+\draw (-1,0) -- (1,0);
+\draw (-0.7,-0.9)--(-0,-0.9) -- (0,0.9) --(0.7,0.9);
+}}
+
+
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=1.4pt, shorten >= 5.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt}]
+\tikzstyle{innerWhite} = [semithick, white,line width=1.4pt, shorten >= 4.5pt]
+
+
+
+\tikzset{clipper_pic/.pic = {
+\draw (-1,-0.9)--(-0.5,-0.9) -- (0.5,0.9) --(1,0.9);
+}}
+
+
+\begin{frame}{TP7}
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[thick,scale=0.6, every node/.style={scale=0.6}]
+			\node[block, label={u\_symbol\_gen}](symbolgenerator){\begin{tabular}{c}
+			Symbol \\
+			Generator
+			\end{tabular}};
+			\node[square_block_medium, right of = symbolgenerator, node distance = 3 cm, label={u\_upsampling}] (upsampler){$\uparrow$};
+			\node[block, right of = upsampler, node distance = 3.5 cm, label={u\_ser\_to\_par}] (u_ser_to_par){\begin{tabular}{c}
+			Serial \\
+			 to \\
+			Parallel
+			\end{tabular}};
+			\node[block, right of = u_ser_to_par, node distance = 3.5 cm, label={u\_parallel\_filter}] (u_parallel_filter){\begin{tabular}{c}
+			Parallel \\
+			 FIR \\
+			 Filter
+			\end{tabular}};
+			\node[block, right of = u_parallel_filter, node distance = 3.5 cm, label={u\_par\_to\_ser}] (u_par_to_ser){\begin{tabular}{c}
+			Parallel \\
+			 to \\
+			Serial
+			\end{tabular}};			
+			\node[node_output, right of = u_par_to_ser, node distance = 3 cm, label = {0:o\_signal}] (o_signal) {} ;
+			
+			\draw[arrows=->, >=latex] (symbolgenerator) -- (upsampler);
+			\draw[arrows=->, >=latex] (upsampler) -- (u_ser_to_par);
+			
+			
+			
+			
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, 0.6)$) -- ($(u_parallel_filter.west) + (0, 0.6)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, 0.2)$) -- ($(u_parallel_filter.west) + (0, 0.2)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, -0.2)$) -- ($(u_parallel_filter.west) + (0, -0.2)$);
+			\draw[arrows=->, >=latex] ($(u_ser_to_par.east) + (0, -0.6)$) -- ($(u_parallel_filter.west) + (0, -0.6)$);
+			
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, 0.6)$) -- ($(u_par_to_ser.west) + (0, 0.6)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, 0.2)$) -- ($(u_par_to_ser.west) + (0, 0.2)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, -0.2)$) -- ($(u_par_to_ser.west) + (0, -0.2)$);
+			\draw[arrows=->, >=latex] ($(u_parallel_filter.east) + (0, -0.6)$) -- ($(u_par_to_ser.west) + (0, -0.6)$);
+
+
+
+			\node[node_clock, label = {180:clk\_slow}] at ($ (symbolgenerator) - (2, 1.5) $) (i_clock){};
+			\node[node_clock, below of = i_clock, node distance = 1 cm, label={180:clk\_fast}] (i_clock_os){};
+			
+			\draw[dotted, arrows=->, >=latex] (i_clock) -| (symbolgenerator);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| (upsampler);
+			\node [right of = i_clock, node distance = 5cm] (aux_clk_slow) {}; 
+			
+			\draw[dotted, arrows=-, >=latex] (i_clock) -- ($(aux_clk_slow.center) + (-0.25,0)$);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow.center) + (+0.25,0)$) -| ($(u_ser_to_par.south) + (-0.5,0)$);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| ($(u_ser_to_par.south) + (0.5,0)$);
+			
+			\node [right of = i_clock, node distance = 9cm] (aux_clk_slow_2) {}; 
+			\draw[dotted, arrows=-, >=latex] ($(aux_clk_slow.center) + (+0.25,0)$) -- ($(aux_clk_slow_2.center) + (-0.25,0)$);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow_2.center) + (+0.25,0)$) -| (u_parallel_filter.south);
+			\draw[dotted, arrows=->, >=latex] ($(aux_clk_slow_2.center) + (+0.25,0)$) -| ($(u_par_to_ser.south) + (-0.5,0)$);
+			\draw[dotted, arrows=->, >=latex] (i_clock_os) -| ($(u_par_to_ser.south) + (0.5,0)$);
+			\draw[arrows=->, >=latex] (u_par_to_ser) -- (o_signal);
+			
+			% Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](i_clock_os) -- ++(0,-0.75) -| (o_signal) -- ++(0,1.75) -| (i_clock) -- (i_clock_os);
+		\end{tikzpicture}
+		\caption{TP7 Connection}
+		\label{fig:transmisor}
+	\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Parallel FIR Filter}
+
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}[thick,scale=0.5, every node/.style={scale=0.5}]
+
+			\node[node_input, label={180:i\_signal[3]}, label={15:x\_t[3]}] (i_signal_3){};
+			\node[node_input, below of = i_signal_3, label={180:i\_signal[2]}, label={15:x\_t[2]}, node distance = 1cm] (i_signal_2){};
+			\node[node_input, below of = i_signal_2, label={180:i\_signal[1]}, label={15:x\_t[1]}, node distance = 1cm] (i_signal_1){};
+			\node[node_input, below of = i_signal_1, label={180:i\_signal[0]}, label={15:x\_t[0]}, node distance = 1cm] (i_signal_0){};
+			
+			\node[square_block, below right of = i_signal_0, node distance = 2.5 cm, label={180:\tiny coeffs[0]}] (h_0_0){\tiny h[0]};
+			%\node[below right of = i_signal_0, node distance = 2 cm, label={0:\tiny h(0)}] (h_0_0){};
+			\node[square_block, right of = h_0_0, node distance = 1 cm] (h_0_1){\tiny h[0]};
+			\node[square_block, right of = h_0_1, node distance = 1 cm] (h_0_2){\tiny h[0]};
+			\node[square_block, right of = h_0_2, node distance = 1 cm] (h_0_3){\tiny h[0]};
+			
+			\node[square_block, right of = h_0_3, node distance = 2 cm, label={180:\tiny coeffs[1]}] (h_1_0){\tiny h[1]};
+			\node[square_block, right of = h_1_0, node distance = 1 cm] (h_1_1){\tiny h[1]};
+			\node[square_block, right of = h_1_1, node distance = 1 cm] (h_1_2){\tiny h[1]};
+			\node[square_block, right of = h_1_2, node distance = 1 cm] (h_1_3){\tiny h[1]};
+			
+			\node[square_block, right of = h_1_3, node distance = 2 cm, label={180:\tiny coeffs[2]}] (h_2_0){\tiny h[2]};
+			\node[square_block, right of = h_2_0, node distance = 1 cm] (h_2_1){\tiny h[2]};
+			\node[square_block, right of = h_2_1, node distance = 1 cm] (h_2_2){\tiny h[2]};
+			\node[square_block, right of = h_2_2, node distance = 1 cm] (h_2_3){\tiny h[2]};
+			
+			\node[square_block, right of = h_2_3, node distance = 2 cm, label={180:\tiny coeffs[3]}] (h_3_0){\tiny h[3]};
+			\node[square_block, right of = h_3_0, node distance = 1 cm] (h_3_1){\tiny h[3]};
+			\node[square_block, right of = h_3_1, node distance = 1 cm] (h_3_2){\tiny h[3]};
+			\node[square_block, right of = h_3_2, node distance = 1 cm] (h_3_3){\tiny h[3]};
+			
+			
+			
+			
+			
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+			%\node[reg, right of = i_signal_2, node distance = 16 cm, label={r\_reg[0]}] (r_reg_0) {};
+			%%\draw[arrows=->,>=latex] (i_signal_2) -- (r_reg_0);
+			%\draw[arrows=->,>=latex, name path=line 1] (i_signal_2) -- (r_reg_0);
+			%\path[name path=line 2] (i_signal_3) -| (h_2_2);
+			%\path [name intersections={of = line 1 and line 2}];
+  			%\coordinate (S)  at (intersection-1);
+  			%\path[name path=circle] (S) circle(\radius);
+  			%\path[name intersections={of = circle and line 2}];
+  			%\coordinate (I1)  at (intersection-1);
+  			%\coordinate (I2)  at (intersection-2);
+  			%\draw (i_signal_3) -| ($ (I1) + (0,-0.03) $);
+  			%\draw[arrows=->,>=latex] ($ (I2) + (0,+0.03) $) -- (h_2_2);
+			%\tkzDrawArc[color=black, line width=1pt](S,I1)(I2);
+			
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%			
+			
+			\node[reg, right of = i_signal_2, node distance = 19.2 cm, label={r\_reg[2]}] (r_reg_2) {};
+			\draw[arrows=->,>=latex] (i_signal_2) -- (r_reg_2);
+			
+			\node[reg, right of = i_signal_1, node distance = 14.2 cm, label={r\_reg[1]}] (r_reg_1) {};
+			\draw[arrows=->,>=latex, orange!40!gray] (i_signal_1) -- (r_reg_1);
+			
+			\node[reg, right of = i_signal_0, node distance = 9.45 cm, label={r\_reg[0]}] (r_reg_0) {};
+			\draw[arrows=->,>=latex, purple!40!gray] (i_signal_0) -- (r_reg_0);			
+			
+			
+			\draw[arrows=->,>=latex, blue!40!gray] (i_signal_3) -| (h_0_3);
+			\draw[arrows=->,>=latex] (i_signal_2) -| (h_0_2);
+			\draw[arrows=->,>=latex, orange!40!gray] (i_signal_1) -| (h_0_1);
+			\draw[arrows=->,>=latex, purple!40!gray] (i_signal_0) -| (h_0_0);
+			
+			\draw[arrows=->,>=latex, red!40!gray] (r_reg_0) -| (h_1_3);
+			\draw[arrows=->,>=latex, blue!40!gray] (i_signal_3) -| (h_1_2);
+			\draw[arrows=->,>=latex] (i_signal_2) -| (h_1_1);
+			\draw[arrows=->,>=latex, orange!40!gray] (i_signal_1) -| (h_1_0);
+			
+			\draw[arrows=->,>=latex, green!40!gray] (r_reg_1) -| (h_2_3);
+			\draw[arrows=->,>=latex, red!40!gray] (r_reg_0) -| (h_2_2);
+			\draw[arrows=->,>=latex,  blue!40!gray] (i_signal_3) -| (h_2_1);
+			\draw[arrows=->,>=latex] (i_signal_2) -| (h_2_0);
+			
+			\draw[arrows=->,>=latex, cyan!40!gray] (r_reg_2) -| (h_3_3);
+			\draw[arrows=->,>=latex, green!40!gray] (r_reg_1) -| (h_3_2);
+			\draw[arrows=->,>=latex, red!40!gray] (r_reg_0) -| (h_3_1);
+			\draw[arrows=->,>=latex,  blue!40!gray] (i_signal_3) -| (h_3_0);
+			
+				
+			%\node[large_sum, below right of = h_0_0, node distance = 2 cm, label={0:\tiny h(0)}] (sum_0) ++ (0,5) {};
+			\node[large_sum] at ($ (h_0_0) + (1.5,-6.4) $) (sum_0) {+};
+			\node[large_sum] at ($ (h_1_0) + (1.5,-6.4) $) (sum_1) {+};
+			\node[large_sum] at ($ (h_2_0) + (1.5,-6.4) $) (sum_2) {+};
+			\node[large_sum] at ($ (h_3_0) + (1.5,-6.4) $) (sum_3) {+};
+		
+			
+	
+	
+			
+			\draw[arrows=->,>=latex, blue!40!gray] (h_0_3) -- ++ (0,-6);
+			
+			\draw[arrows=-,>=latex] (h_0_2) |- ++ (6,-2);			
+			\draw[arrows=->,>=latex] ($(h_0_2) + (6,-2)$) -- ++ (0,-4);
+			
+			\draw[arrows=-,>=latex, orange!40!gray] (h_0_1) |- ++ (12,-3);
+			\draw[arrows=->,>=latex, orange!40!gray] ($(h_0_1) + (12,-3)$) -- ++ (0,-3);
+
+			\draw[arrows=-,>=latex, purple!40!gray] (h_0_0) |- ++ (18,-3.5);
+			\draw[arrows=->,>=latex, purple!40!gray] ($(h_0_0) + (18,-3.5)$) -- ++ (0,-2.5);
+			
+			
+			
+			\draw[arrows=-,>=latex, red!40!gray] (h_1_3) |- ++ (-2.5,-1.5);
+			\draw[arrows=-,>=latex, red!40!gray] ($(h_1_3) + (-2.5,-1.5)$) -- ++ (0,-2.5);
+			\draw[arrows=->,>=latex, red!40!gray] ($(h_1_3) + (-2.5,-4)$) -| ++ (-3.5,-2);
+			
+			\draw[arrows=->,>=latex, blue!40!gray] (h_1_2) -- ++ (0,-6);
+			
+			\draw[arrows=-,>=latex] (h_1_1) |- ++ (3,-1);
+			\draw[arrows=-,>=latex] ($(h_1_1) + (3,-1)$) -- ++ (0,-1);
+			\draw[arrows=->,>=latex] ($(h_1_1) + (3,-2)$) -| ++ (3,-4);			
+		
+			\draw[arrows=-,>=latex, orange!40!gray] (h_1_0) |- ++ (12,-2.5);
+			\draw[arrows=->,>=latex, orange!40!gray] ($(h_1_0) + (12,-2.5)$) -- ++ (0,-3.5);
+			
+			
+			
+			\draw[arrows=-,>=latex, green!40!gray] (h_2_3) |- ++ (-2.5,-1.5);
+			\draw[arrows=-,>=latex, green!40!gray] ($(h_2_3) + (-2.5,-1.5)$) -- ++ (0,-3);
+			\draw[arrows=->,>=latex, green!40!gray] ($(h_2_3) + (-2.5,-4.5)$) -| ++ (-9.5,-1.5);
+			
+			\draw[arrows=-,>=latex, red!40!gray] (h_2_2) |- ++ (-2.5,-0.5);
+			\draw[arrows=-,>=latex, red!40!gray] ($(h_2_2) + (-2.5,-0.5)$) -- ++ (0,-3.5);
+			\draw[arrows=->,>=latex, red!40!gray] ($(h_2_2) + (-2.5,-4)$) -| ++ (-3.5,-2);
+			
+			\draw[arrows=->,>=latex,  blue!40!gray] (h_2_1) -- ++ (0,-6);
+			
+			\draw[arrows=-,>=latex] (h_2_0) |- ++ (6,-1);
+			\draw[arrows=->,>=latex] ($(h_2_0) + (6,-1)$) -- ++ (0,-5);
+			
+			
+			
+			\draw[arrows=-,>=latex, cyan!40!gray] (h_3_3) |- ++ (-4,-3);
+			\draw[arrows=-,>=latex, cyan!40!gray] ($(h_3_3) + (-4,-3)$) -| ++ (0,-2.5);
+			\draw[arrows=->,>=latex, cyan!40!gray] ($(h_3_3) + (-4,-5.5)$) -| ++ (-14,-0.5);
+			
+			\draw[arrows=-,>=latex, green!40!gray] (h_3_2) |- ++ (-2.5,-1.5);
+			\draw[arrows=-,>=latex, green!40!gray] ($(h_3_2) + (-2.5,-1.5)$) -- ++ (0,-3.5);
+			\draw[arrows=->,>=latex, green!40!gray] ($(h_3_2) + (-2.5,-5)$) -| ++ (-9.5,-1);
+
+			\draw[arrows=-,>=latex, red!40!gray] (h_3_1) |- ++ (-2.5,-0.5);
+			\draw[arrows=-,>=latex, red!40!gray] ($(h_3_1) + (-2.5,-0.5)$) -- ++ (0,-3.5);
+			\draw[arrows=->,>=latex, red!40!gray] ($(h_3_1) + (-2.5,-4)$) -| ++ (-3.5,-2);
+
+			\draw[arrows=->,>=latex,  blue!40!gray] (h_3_0) -- ++ (0,-6);
+			
+			
+			
+			
+			
+			
+			
+			\node[node_output, right of = i_signal_3, node distance = 24.5 cm, label={0:o\_signal[3]}, label={165:y\_t[3]}] (o_signal_3){};
+			\node[] at ($ (sum_0) + (1,-1.5) $) (sum_aux_0){};
+			\node[] at ($ (o_signal_3) + (-1.5,0) $) (o_signal_aux_3){};
+			\draw[arrows=-,>=latex,  blue!40!gray] (sum_0.south) |- (sum_aux_0.center);
+			\draw[arrows=-,>=latex,  blue!40!gray] (sum_aux_0.center) -| (o_signal_aux_3.center);
+			\draw[arrows=->,>=latex,  blue!40!gray] (o_signal_aux_3.center) -- (o_signal_3);
+			
+			\node[node_output, below of = o_signal_3, node distance = 1.2 cm, label={0:o\_signal[2]}, label={165:y\_t[2]}] (o_signal_2){};
+			\node[] at ($ (sum_1) + (1,-1.2) $) (sum_aux_1){};
+			\node[] at ($ (o_signal_2) + (-2,0) $) (o_signal_aux_2){};
+			\draw[arrows=-,>=latex] (sum_1.south) |- (sum_aux_1.center);
+			\draw[arrows=-,>=latex] (sum_aux_1.center) -| (o_signal_aux_2.center);
+			\draw[arrows=->,>=latex] (o_signal_aux_2.center) -- (o_signal_2);
+			
+			\node[node_output, below of = o_signal_2, node distance = 1.2 cm, label={0:o\_signal[1]}, label={165:y\_t[1]}] (o_signal_1){};
+			\node[] at ($ (sum_2) + (1,-0.9) $) (sum_aux_2){};
+			\node[] at ($ (o_signal_1) + (-2.5,0) $) (o_signal_aux_1){};
+			\draw[arrows=-,>=latex, purple!40!gray] (sum_2.south) |- (sum_aux_2.center);
+			\draw[arrows=-,>=latex, purple!40!gray] (sum_aux_2.center) -| (o_signal_aux_1.center);
+			\draw[arrows=->,>=latex, purple!40!gray] (o_signal_aux_1.center) -- (o_signal_1);
+			
+			\node[node_output, below of = o_signal_1, node distance = 1.2 cm, label={0:o\_signal[0]}, label={165:y\_t[0]}] (o_signal_0){};
+			\node[] at ($ (sum_3) + (1,-0.6) $) (sum_aux_3){};
+			\node[] at ($ (o_signal_0) + (-3,0) $) (o_signal_aux_0){};
+			\draw[arrows=-,>=latex, orange!40!gray] (sum_3.south) |- (sum_aux_3.center);
+			\draw[arrows=-,>=latex, orange!40!gray] (sum_aux_3.center) -| (o_signal_aux_0.center);
+			\draw[arrows=->,>=latex, orange!40!gray] (o_signal_aux_0.center) -- (o_signal_0);
+
+
+
+			
+			
+			
+			
+			
+			\node[node_clock, below of = i_signal_0, node distance = 7 cm, label={180:i\_clock}] (clock){};
+			\node[] at ($ (clock) + (0.25,6) $) (node_aux_0) {};
+			\draw[dotted,arrows=-,>=latex] (clock) -| (node_aux_0.center);
+			
+            \draw[dotted,arrows=->,>=latex] (node_aux_0.center) -| (r_reg_2.south);
+            \draw[dotted,arrows=->,>=latex] ($(r_reg_1) + (0,-2)$) -| (r_reg_1.south);
+            \draw[dotted,arrows=->,>=latex] ($(r_reg_0) + (0,-1)$) -| (r_reg_0.south);
+            
+            % Module
+            \draw [ rounded corners,dashed,postaction={draw,line width=1pt}](clock) -- ++(0,-2.85) -| (o_signal_0) -- (o_signal_1)-- (o_signal_2) -- (o_signal_3) -- ++(0,1.5) -| (i_signal_3) -- (i_signal_3) -- (i_signal_2) -- (i_signal_1) -- (i_signal_0) -- (clock);
+			
+		
+		\end{tikzpicture}
+		\label{fig:modulo_lms}
+	\end{figure}
+	
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}{Equations}
+
+\doublespacing
+		$y\_t[0] = x\_t[0] \cdot coeffs[0] + ~~~~~~~ x\_t[1] \cdot coeffs[1] + ~~~~~~~ x\_t[2] \cdot coeffs[2] + ~~~~~~~ x\_t[3] \cdot coeffs[3]$
+		\\
+		$y\_t[1] = x\_t[1] \cdot coeffs[0] + ~~~~~~~ x\_t[2] \cdot coeffs[1] + ~~~~~~~ x\_t[3] \cdot coeffs[2] + r\_reg.o[0] \cdot coeffs[3]$
+		\\
+		$y\_t[2] = x\_t[2] \cdot coeffs[0] + ~~~~~~~ x\_t[3] \cdot coeffs[1] + r\_reg.o[0] \cdot coeffs[2] + r\_reg.o[1] \cdot coeffs[3]$
+		\\
+		$y\_t[3] = x\_t[3] \cdot coeffs[0] + r\_reg.o[0] \cdot coeffs[1] + r\_reg.o[1] \cdot coeffs[2] + r\_reg.o[2] \cdot coeffs[3]$
+
+	
+\end{frame}
+
+
+
+
+
+
+\end{document}
