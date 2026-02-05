@@ -1,0 +1,19 @@
+root:
+  br: 200e9
+  enable_log: 0
+  logger_buffer_size: 1000
+  m_qam: 16
+  n_ovr: 2
+  n_symbols: 10000
+  u_awgn_ch:
+    ebno_db: 100
+    seed: 0
+  u_ber_counter:
+    corr_signals_size: 100
+    enable: 0
+  u_downsampler:
+    phase: 0
+  u_symbol_gen:
+    seed: 0
+  u_upsampler:
+    phase: 0
